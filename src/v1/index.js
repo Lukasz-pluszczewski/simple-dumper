@@ -1,13 +1,66 @@
 import { Router as router } from 'express';
+import _ from 'lodash';
 import { name, version, author } from '../../package.json';
-import getRequestData from '../helpers/getRequestData';
+import { extractRequest, simplifyRequest } from '../helpers/getRequestData';
 import resourceCrud from '../services/resourceCrud';
+
+const matchObject = (object, filter) => {
+  return _.some(object, (value, key) => {
+    return filter.test(key) || (_.isPlainObject(value) ? matchObject(value, filter) : filter.test(value));
+  });
+};
+
+const filterWrapper = (filterValue, field) => el => {
+  const filter = new RegExp(filterValue);
+  if (_.isObject(el[field])) {
+    console.log('matching object', field, el[field], matchObject(el[field], filter));
+    return matchObject(el[field], filter);
+  }
+  if (_.isArray(el[field])) {
+    return _.some(el[field], value => filter.test(value));
+  }
+  return filter.test(el[field]);
+};
+
+const applyFilters = filters => (req, wrapper) => {
+  filters.forEach(field => {
+    const filterValue = req.query[field];
+    if (filterValue) {
+      wrapper = wrapper.filter(filterWrapper(filterValue, field));
+    }
+  });
+  return wrapper;
+};
+
+const filterMiddleware = (req, count = false) => wrapper => {
+  if (req.query.full !== 'true') {
+    wrapper = wrapper.map(simplifyRequest);
+  }
+  wrapper = applyFilters([
+    'method',
+    'baseUrl',
+    'query',
+    'body',
+    'headers',
+  ])(req, wrapper);
+
+  if (req.query.id) {
+    wrapper = wrapper.find({ id: req.query.id });
+  }
+  if (count) {
+    return wrapper.size();
+  }
+  return wrapper;
+};
 
 export default () => {
   const api = router();
 
   api.get('/requests', (req, res) => {
-    res.json(resourceCrud.get('requests'));
+    res.json(resourceCrud.get('requests', filterMiddleware(req)));
+  });
+  api.get('/count', (req, res) => {
+    res.json(resourceCrud.get('requests', filterMiddleware(req, true)));
   });
   api.delete('/requests', (req, res) => {
     resourceCrud.clear('requests');
@@ -21,24 +74,9 @@ export default () => {
     res.json({ message: 'ok' });
   });
   api.use('*', (req, res) => {
-    const requestData = getRequestData(req);
+    const requestData = extractRequest(req);
     resourceCrud.create('requests', requestData);
     res.json(requestData);
-  });
-
-  // api data
-  api.get('/health', (req, res) => {
-    res.json({
-      status: 'Healthy',
-      name,
-      appVersion: version,
-      apiVersion: 1,
-      apiVersions: [
-        'V0',
-        'v1',
-      ],
-      author,
-    });
   });
 
   return api;

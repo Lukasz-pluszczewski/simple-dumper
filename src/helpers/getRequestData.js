@@ -24,4 +24,16 @@ const serializableFields = [
   'body',
 ];
 
-export default req => _.clone(_.pick(req, serializableFields));
+const simpleFields = [
+  'headers',
+  'method',
+  'baseUrl',
+  'query',
+  'body',
+  'id',
+];
+
+export const extractRequest = req => _.clone(_.pick(req, serializableFields));
+
+export const simplifyRequest = req => _.clone(_.pick(req, simpleFields));
+
