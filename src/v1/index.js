@@ -13,7 +13,6 @@ const matchObject = (object, filter) => {
 const filterWrapper = (filterValue, field) => el => {
   const filter = new RegExp(filterValue);
   if (_.isObject(el[field])) {
-    console.log('matching object', field, el[field], matchObject(el[field], filter));
     return matchObject(el[field], filter);
   }
   if (_.isArray(el[field])) {
@@ -37,6 +36,7 @@ const filterMiddleware = (req, count = false) => wrapper => {
     wrapper = wrapper.map(simplifyRequest);
   }
   wrapper = applyFilters([
+    'date',
     'method',
     'baseUrl',
     'query',
@@ -74,7 +74,10 @@ export default () => {
     res.json({ message: 'ok' });
   });
   api.use('*', (req, res) => {
-    const requestData = extractRequest(req);
+    const requestData = {
+      ...extractRequest(req),
+      date: (new Date()).toISOString(),
+    };
     resourceCrud.create('requests', requestData);
     res.json(requestData);
   });

@@ -1,6 +1,7 @@
 import _ from 'lodash';
 
 const serializableFields = [
+  'date',
   'readable',
   'domain',
   'httpVersionMajor',
@@ -25,6 +26,7 @@ const serializableFields = [
 ];
 
 const simpleFields = [
+  'date',
   'headers',
   'method',
   'baseUrl',
