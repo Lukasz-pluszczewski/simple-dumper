@@ -1,8 +1,8 @@
 {
-  "name": "appEngine",
+  "name": "simple-dumper",
   "version": "0.2.0",
-  "description": "Simple self-hosted app engine",
-  "repository": "https://git.brainhub.pl/lukaszProjects/appEngine",
+  "description": "Simple request dumper",
+  "repository": "https://github.com/Lukasz-pluszczewski/simple-dumper",
   "main": "dist",
   "scripts": {
     "dev": "NODE_PATH=src ENV=development nodemon -w ./ --ignore \"apps\" --exec \"babel-node src\"",
