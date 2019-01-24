@@ -5,7 +5,7 @@
   "repository": "https://github.com/Lukasz-pluszczewski/simple-dumper",
   "main": "dist",
   "scripts": {
-    "dev": "NODE_PATH=src ENV=development nodemon -w ./ --ignore \"apps\" --exec \"babel-node src\"",
+    "dev": "NODE_PATH=src ENV=development nodemon -w ./ --ignore \"apps\" --ignore \"db.json\" --exec \"babel-node src\"",
     "build": "NODE_PATH=src babel src -s -D -d dist",
     "start": "NODE_PATH=dist ENV=production node dist",
     "prestart": "NODE_PATH=src npm run -s build",

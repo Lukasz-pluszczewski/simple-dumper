@@ -28,3 +28,6 @@ Gets full information about request by it's id
 
 #### DELETE /requests/:id
 Deletes one entry
+
+## Docker
+`docker run -d sigmification/simple-dumper`
